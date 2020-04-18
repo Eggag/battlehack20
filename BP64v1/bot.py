@@ -3,7 +3,7 @@ import random
 # disable debug when it is not needed
 DEBUG = 1
 def dlog(str):
-    if DEBUG > 0:
+    if DEBUG == 1:
         log(str)
 
 # checks if it is a valid cell
@@ -29,7 +29,6 @@ team = None
 oppTeam = None
 spawnRow = 0
 
-# work on it later, will depend on what the strategy for the overlord is
 def run_pawn():
     global row, col
     row, col = get_location()
@@ -51,16 +50,7 @@ def run_pawn():
         return
     if((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)):
         if(valid(row + forward, col) == False): move_forward()
-
-"""
-Strategy for the overlord
-- prioritize defence, but only monitor starting from row ~13 to avoid not attacking
-- empty cols should have higher value
-- empty cols near 'filled by us' cols are even better
-- check before sending an attacker
-- might be too defensive, but we'll see
-"""
-
+        
 def tryDefend():
     bestX = -100
     bestY = -100
@@ -77,6 +67,8 @@ def tryDefend():
                         for k in range(i + 1, boardSize):
                             if board[k][j - 1] == team:
                                 f = False
+                            if board[k][j - 1] == oppTeam:
+                                f = False
                         if f:
                             if(((j == 1) or ((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam)) and (board[boardSize - 1][j] != oppTeam)):
                                 if(i > bestX):
@@ -85,7 +77,9 @@ def tryDefend():
                     if j < (boardSize - 1):
                             f = True
                             for k in range(i + 1, boardSize):
-                               if board[k][j + 1] == team:
+                                if board[k][j + 1] == team:
+                                    f = False
+                                if board[k][j + 1] == oppTeam:
                                     f = False
                             if f:
                                 if((board[boardSize - 1][j] != oppTeam) and (((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam) or (j + 2 >= boardSize))):
@@ -122,13 +116,60 @@ def tryDefend():
     return False
 
 def tryAttack():
-    # time to do some attacking!
-    attack = True
+    # endpoints are of higher priority
+    pos = []
+    pos.append(0)
+    pos.append(15)
+    for i in range(1, 15): pos.append(i)
+    # process them in the order of importance
+    for i in pos:
+        f = True
+        for j in range(boardSize):
+            if(board[j][i] == team or board[j][i] == oppTeam):
+                f = False
+                break
+        if f:
+            spawn(spawnRow, i)
+            return
+    # try to put it into a row we 'have'
+    op = 0
+    if(team == Team.WHITE): op = boardSize - 1 
+    for i in range(boardSize):
+        if(board[op][i] == team):
+            f1 = True
+            for j in range(boardSize):
+                if((j != op) and (board[j][i] == team or board[j][i] == oppTeam)):
+                    f1 = False
+                    break
+            if f1:
+                spawn(spawnRow, i)
+                return
+    # just pick the one with the least of ours?
+    best = -1
+    mn = 1e9
+    for i in range(boardSize):
+        cur = 0
+        for j in range(boardSize):
+            if board[j][i] == team:
+                cur += 1
+        if(cur < mn and valid(spawnRow, i) == False):
+            mn = cur
+            best = i
+    if best != -1: spawn(spawnRow, best)
+    else:
+        # spawn randomly?
+        for _ in range(boardSize):
+            i = random.randint(0, boardSize - 1)
+            if(valid(spawnRow, i) == False):
+                spawn(spawnRow, i)
+                break
+        
 
 def run_overlord():
     global board
     board = get_board()
-    if tryDefend(): return
+    if tryDefend():
+        return
     tryAttack()
 
 def turn():
