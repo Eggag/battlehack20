@@ -1,5 +1,3 @@
-import random
-
 # disable debug when it is not needed
 DEBUG = 1
 def dlog(str):
@@ -58,7 +56,7 @@ def tryDefend():
         bestX = 100
         bestY = 100
     if team == Team.BLACK:
-        for i in range(3, boardSize - 1):
+        for i in range(2, boardSize - 1):
             for j in range(boardSize):
                 if board[i][j] == oppTeam:
                     if j > 0:
@@ -87,7 +85,7 @@ def tryDefend():
                                         bestX = i
                                         bestY = j + 1
     else:
-        for i in range(1, boardSize - 3):
+        for i in range(1, boardSize - 2):
             for j in range(boardSize):
                 if board[i][j] == oppTeam:
                     if j > 0:
@@ -155,15 +153,7 @@ def tryAttack():
         if(cur < mn and valid(spawnRow, i) == False):
             mn = cur
             best = i
-    if best != -1: spawn(spawnRow, best)
-    else:
-        # spawn randomly?
-        for _ in range(boardSize):
-            i = random.randint(0, boardSize - 1)
-            if(valid(spawnRow, i) == False):
-                spawn(spawnRow, i)
-                break
-        
+    if best != -1: spawn(spawnRow, best)    
 
 def run_overlord():
     global board
