@@ -73,7 +73,7 @@ def tryDefend():
         bestX = 100
         bestY = 100
     if team == Team.BLACK:
-        for i in range(2, boardSize - 1):
+        for i in range(boardSize - 1):
             for j in range(boardSize):
                 if board[i][j] == oppTeam:
                     if j > 0:
@@ -102,7 +102,7 @@ def tryDefend():
                                         bestX = i
                                         bestY = j + 1
     else:
-        for i in range(1, boardSize - 2):
+        for i in range(1, boardSize):
             for j in range(boardSize):
                 if board[i][j] == oppTeam:
                     if j > 0:
