@@ -53,7 +53,7 @@ def run_pawn():
         capture(row + forward, col - 1)
         return
     kms = False
-    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) > 5):
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) > 20):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
@@ -143,7 +143,7 @@ def tryAttack():
     # try to put it into a row we 'have'
     op = 0
     if(team == Team.WHITE): op = boardSize - 1 
-    for i in range(boardSize):
+    for i in pos:
         if(board[op][i] == team):
             f1 = True
             for j in range(boardSize):
