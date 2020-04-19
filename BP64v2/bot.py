@@ -28,8 +28,6 @@ oppTeam = None
 spawnRow = 0
 lstNum = 0
 curNum = 0
-numCyc = 0
-thr = [150, 1000]
 
 def run_pawn():
     global row, col
@@ -54,13 +52,9 @@ def run_pawn():
     if valid(row + forward, col - 1) == oppTeam:
         capture(row + forward, col - 1)
         return
-    goodPos = False
-    if((team == Team.WHITE and row >= 6) or (team == Team.BLACK and row <= 9)): goodPos = True
     kms = False
-    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team or valid(row, col + 1) == team) and goodPos and (curNum - lstNum) > thr[numCyc]):
+    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team or valid(row, col + 1) == team) and (curNum - lstNum) > 20):
         kms = True
-        numCyc += 1
-        # if want to use it, put or kms in the loop
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
             move_forward()
