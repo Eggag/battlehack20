@@ -1,5 +1,3 @@
-import random
-
 # disable debug when it is not needed
 DEBUG = 1
 def dlog(str):
@@ -173,14 +171,6 @@ def tryAttack():
             mn = cur
             best = i
     if best != -1: spawn(spawnRow, best)
-    else:
-        # spawn randomly?
-        for _ in range(boardSize):
-            i = random.randint(0, boardSize - 1)
-            if(valid(spawnRow, i) == False):
-                spawn(spawnRow, i)
-                break
-        
 
 def run_overlord():
     global board
