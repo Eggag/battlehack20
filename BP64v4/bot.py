@@ -42,11 +42,76 @@ def run_pawn():
         capture(row + forward, col - 1)
         return
     kms = False
-    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team or valid(row, col + 1) == team)):
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team or valid(row, col + 1) == team)):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
             move_forward()
+
+def tryDefend():
+    bestX = -100
+    bestY = -100
+    if team == Team.WHITE:
+        bestX = 100
+        bestY = 100
+    if team == Team.BLACK:
+        for i in range(2, boardSize - 1):
+            for j in range(boardSize):
+                if board[i][j] == oppTeam:
+                    if j > 0:
+                        # this can be improved (I think)
+                        f = True
+                        for k in range(i + 1, boardSize):
+                            if board[k][j - 1] == team:
+                                f = False
+                            if board[k][j - 1] == oppTeam:
+                                f = False
+                        if f:
+                            if(((j == 1) or ((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam)) and (board[boardSize - 1][j] != oppTeam)):
+                                if(i > bestX):
+                                    bestX = i
+                                    bestY = j - 1
+                    if j < (boardSize - 1):
+                            f = True
+                            for k in range(i + 1, boardSize):
+                                if board[k][j + 1] == team:
+                                    f = False
+                                if board[k][j + 1] == oppTeam:
+                                    f = False
+                            if f:
+                                if((board[boardSize - 1][j] != oppTeam) and (((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam) or (j + 2 >= boardSize))):
+                                    if(i > bestX):
+                                        bestX = i
+                                        bestY = j + 1
+    else:
+        for i in range(1, boardSize - 2):
+            for j in range(boardSize):
+                if board[i][j] == oppTeam:
+                    if j > 0:
+                        f = True
+                        for k in range(i - 1, -1, -1):
+                            if board[k][j - 1] == team:
+                                f = False
+                        if f:
+                            if(((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam) and (board[boardSize - 1][j] != oppTeam)):
+                                if(i < bestX):
+                                    bestX = i
+                                    bestY = j - 1
+                    if j < (boardSize - 1):
+                            f = True
+                            nm = 0
+                            for k in range(i - 1, -1, -1):
+                                if board[k][j + 1] == team:
+                                    f = False
+                            if f:
+                                if((board[boardSize - 1][j] != oppTeam) and ((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam)):
+                                    if(i < bestX):
+                                        bestX = i
+                                        bestY = j + 1
+    if(bestX != 100 and bestX != -100):
+        spawn(spawnRow, bestY)
+        return True
+    return False
 
 def tryAttack():
     # try to put it into a row we 'have'
@@ -66,7 +131,7 @@ def tryAttack():
     # just pick the one with the least of ours?
     best = -1
     mn = 1e9
-    for i in range(9):
+    for i in range(5):
         if(board[op][i] != team): # counter CC
             cur = 0
             for j in range(boardSize):
@@ -80,6 +145,7 @@ def tryAttack():
 def run_overlord():
     global board
     board = get_board()
+    if tryDefend(): return
     tryAttack()
 
 def turn():
