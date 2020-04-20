@@ -104,6 +104,8 @@ def tryDefend():
                         for k in range(i - 1, -1, -1):
                             if board[k][j - 1] == team:
                                 f = False
+                            if board[k][j - 1] == oppTeam:
+                                f = False
                         if f:
                             if(((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam) and (board[boardSize - 1][j] != oppTeam)):
                                 if(i < bestX):
@@ -113,6 +115,8 @@ def tryDefend():
                             f = True
                             for k in range(i - 1, -1, -1):
                                 if board[k][j + 1] == team:
+                                    f = False
+                                if board[k][j + 1] == oppTeam:
                                     f = False
                             if f:
                                 if((board[boardSize - 1][j] != oppTeam) and ((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam)):
