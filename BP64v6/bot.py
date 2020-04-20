@@ -50,6 +50,7 @@ def run_pawn():
     if valid(row + forward, col - 1) == oppTeam:
         capture(row + forward, col - 1)
         return
+    """
     numBel = 0
     # need to have more below for a successful attack
     if team == Team.WHITE:
@@ -62,8 +63,9 @@ def run_pawn():
             for j in range(-1, 2):
                 if j != 0:
                     if(valid(row + i, col + j) == team): numBel += 1
+    """
     kms = False
-    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) > 30 and numBel >= 4):
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) > 50):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
@@ -171,13 +173,14 @@ def tryAttack():
     best = -1
     mn = 1e9
     for i in range(boardSize):
-        cur = 0
-        for j in range(boardSize):
-            if board[j][i] == team:
-                cur += 1
-        if(cur < mn and valid(spawnRow, i) == False):
-            mn = cur
-            best = i
+        if board[op][i] != team:
+            cur = 0
+            for j in range(boardSize):
+                if board[j][i] == team:
+                    cur += 1
+            if(cur < mn and valid(spawnRow, i) == False):
+                mn = cur
+                best = i
     if best != -1: spawn(spawnRow, best)
 
 def run_overlord():
