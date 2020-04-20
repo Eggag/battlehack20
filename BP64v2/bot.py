@@ -50,8 +50,26 @@ def run_pawn():
     if valid(row + forward, col - 1) == oppTeam:
         capture(row + forward, col - 1)
         return
+    numBel = 0
+    # need to have more below for a successful attack
+    if team == Team.WHITE:
+        for i in range(-2, 2):
+            for j in range(-1, 2):
+                if j != 0:
+                    if(valid(row + i, col + j) == team): numBel += 1
+    else:
+        for i in range(-1, 3):
+            for j in range(-1, 2):
+                if j != 0:
+                    if(valid(row + i, col + j) == team): numBel += 1
     kms = False
-    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) > 30):
+    op = 0
+    if(team == Team.WHITE): op = boardSize - 1 
+    thr = 7
+    if(row == (op - (2 * forward))): thr = 6
+    if(row == (op - (forward))): thr = 6
+    if((curNum - lstNum) > 150): thr = 6
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
@@ -124,6 +142,48 @@ def tryDefend():
     if(bestX != 100 and bestX != -100):
         spawn(spawnRow, bestY)
         return True
+    else:
+        mn1 = 1e9
+        bst1 = -1
+        nm1 = 1e9
+        mx1 = -1e9
+        bst2 = -1
+        nm2 = 1e9
+        for i in range(boardSize):
+            mn = 1e9
+            mx = -1e9
+            nm = 0
+            for j in range(boardSize):
+                if(oppTeam == board[j][i]):
+                    if(j < mn): mn = j
+                    if(j > mx): mx = j
+                if(team == board[j][i]):
+                    nm += 1
+            if(valid(spawnRow, i) == False and nm < 4):
+                if(mn < mn1):
+                    bst1 = i
+                    mn1 = mn
+                    nm1 = nm
+                elif(mn == mn1):
+                    if(nm < nm1):
+                        bst1 = i
+                        nm1 = nm
+                if(mx > mx1):
+                    bst2 = i
+                    mx1 = mx
+                    nm2 = nm
+                elif(mx == mx1):
+                    if(nm < nm2):
+                        bst2 = i
+                        nm2 = nm
+        if team == Team.WHITE:
+            if(bst1 != -1 and mn1 <= 6):
+                spawn(spawnRow, bst1)
+                return True
+        else:
+            if(bst2 != -1 and mx1 >= 10):
+                spawn(spawnRow, bst2)
+                return True
     return False
 
 def tryAttack():
@@ -163,7 +223,7 @@ def tryAttack():
         for j in range(boardSize):
             if board[j][i] == team:
                 cur += 1
-        if(cur < mn and valid(spawnRow, i) == False):
+        if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
             mn = cur
             best = i
     if best != -1: spawn(spawnRow, best)
