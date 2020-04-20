@@ -31,9 +31,7 @@ curNum = 0
 
 def run_pawn():
     global row, col
-    global lstNum, curNum, numCyc
-    global thr
-    dlog(str(curNum) + ' ' + str(lstNum))
+    global lstNum, curNum
     row, col = get_location()
     dlog('My location is: ' + str(row) + ' ' + str(col))
     if(team == Team.BLACK and row == 0): return
