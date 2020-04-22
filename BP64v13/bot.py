@@ -65,9 +65,9 @@ def run_pawn():
                     if(valid(row + i, col + j) == team): numBel += 1
     gd = True
     if(team == Team.WHITE):
-        if(row >= 10): gd = False
+        if(row >= 9): gd = False
     else:
-        if(row <= 6): gd = False
+        if(row <= 7): gd = False
     kms = False
     op = 0
     if(team == Team.WHITE): op = boardSize - 1
@@ -155,7 +155,7 @@ def tryAttack():
     # endpoints are of higher priority
     # don't ask...
     # pos = [9, 1, 15, 3, 13, 5, 11, 7]
-    pos = [9, 1, 15, 7, 11, 2, 13, 5, 0, 14, 2, 12, 4, 10, 6, 8]
+    pos = [9, 1, 15, 3, 11, 5, 13, 7, 0, 14, 2, 12, 4, 10, 6, 8]
     # pos = [1, 3, 2, 15, 4, 14, 5, 13, 6, 12, 7, 11, 8, 12, 16]
     # pos = [0, 2, 1, 15, 3, 14, 4, 13, 5, 12, 6, 11, 7, 10, 8, 14]
     # pos = [0, 2, 1, 15, 3, 5, 4, 14, 6, 8, 7, 13, 9, 11, 10, 12]
