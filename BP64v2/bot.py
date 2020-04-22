@@ -181,7 +181,7 @@ def tryDefend():
                 spawn(spawnRow, bst1)
                 return True
         else:
-            if(bst2 != -1 and mx1 >= 10):
+            if(bst2 != -1 and mx1 >= 9):
                 spawn(spawnRow, bst2)
                 return True
     return False
