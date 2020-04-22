@@ -1,5 +1,5 @@
 # disable debug when it is not needed
-DEBUG = 1
+DEBUG = 0
 def dlog(str):
     if DEBUG == 1:
         log(str)
@@ -34,17 +34,11 @@ def run_pawn():
     global row, col
     global lstNum, curNum
     row, col = get_location()
-    l = [1, 4, 7, 10, 13]
     dlog('My location is: ' + str(row) + ' ' + str(col))
     if(team == Team.BLACK and row == 0): return
     if(team == Team.WHITE and row == boardSize - 1): return
     forward = 1
     if team == Team.BLACK: forward = -1
-    # check if we can attack someone
-    # if we can't, try to move, but check if we will get attacked there
-    # this is very simple
-    # in reality, we need to do some sort of check
-    # which side we should go to, but that is for later...
     curNum += 1
     if valid(row + forward, col + 1) == oppTeam:
         capture(row + forward, col + 1)
@@ -53,7 +47,6 @@ def run_pawn():
         capture(row + forward, col - 1)
         return
     numBel = 0
-    # need to have more below for a successful attack
     if team == Team.WHITE:
         for i in range(-2, 2):
             for j in range(-1, 2):
@@ -78,21 +71,10 @@ def run_pawn():
     op = 0
     if(team == Team.WHITE): op = boardSize - 1 
     thr = 7
-    if(team == Team.BLACK):
-        if(row >= 9): thr = 6
-    if(team == Team.WHITE):
-        if(row <= 6): thr = 6
     if(row == (op - (2 * forward))): thr = 6
     if(row == (op - (forward))): thr = 6
-    if((curNum - lstNum) > 60): thr = 6
-    badR = False
-    if(team == Team.BLACK):
-        if(row > 8): badR = True
-    else:
-        if(row < 7): badR = True
-    gd1 = False
-    if((col in l) or badR): gd1 = True
-    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd and gd1):
+    if((curNum - lstNum) > 100): thr = 6
+    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
@@ -110,7 +92,6 @@ def tryDefend():
             for j in range(boardSize):
                 if board[i][j] == oppTeam:
                     if j > 0:
-                        # this can be improved (I think)
                         f = True
                         for k in range(i + 1, boardSize):
                             if board[k][j - 1] == team:
@@ -168,14 +149,7 @@ def tryDefend():
     return False
 
 def tryAttack():
-    global roundNum
-    # endpoints are of higher priority
-    # don't ask...
-    # pos = [9, 1, 15, 3, 13, 5, 11, 7, 0, 14, 2, 12, 4, 10, 6, 8]
-    # pos = [9, 7, 1, 15, 3, 11, 13, 5, 0, 14, 2, 12, 4, 10, 6, 8]
     pos = [9, 1, 14, 4, 6, 11, 0, 2, 3, 5, 7, 8, 10, 12, 13, 15]
-    l = [1, 4, 7, 10, 13]
-    # starting build
     for i in pos:
         f = True
         for j in range(boardSize):
@@ -197,70 +171,27 @@ def tryAttack():
             if f1:
                 spawn(spawnRow, i)
                 return
-    # put at most 3 on odds if the turn is above 30?
-    if(roundNum < 50):
-        best = -1
-        mn = 1e9
-        for i in range(boardSize):
-            cur = 0
-            for j in range(boardSize):
-                if board[j][i] == team:
-                    cur += 1
-            if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
-                mn = cur
-                best = i
-        if best != -1: spawn(spawnRow, best)
-    else:
-        best = -1
-        mn = 1e9
-        for i in range(boardSize):
-            if(i in l):
-                cur = 0
-                for j in range(boardSize):
-                    if board[j][i] == team:
-                        cur += 1
-                if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
-                    mn = cur
-                    best = i
-        if best != -1 and mn < 3:
-            spawn(spawnRow, best)
-            return
-        best = -1
-        mn = 1e9
-        for i in range(boardSize):
-            if(not (i in l)):
-                cur = 0
-                for j in range(boardSize):
-                    if board[j][i] == team:
-                        cur += 1
-                if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
-                    mn = cur
-                    best = i
-        if best != -1:
-            spawn(spawnRow, best)
-            return
-        best = -1
-        mn = 1e9
-        for i in range(boardSize):
-            if(i in l):
-                cur = 0
-                for j in range(boardSize):
-                    if board[j][i] == team:
-                        cur += 1
-                if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
-                    mn = cur
-                    best = i
-        if best != -1 and mn:
-            spawn(spawnRow, best)
+    best = -1
+    mn = 1e9
+    for i in range(boardSize):
+        cur = 0
+        for j in range(boardSize):
+            if board[j][i] == team:
+                cur += 1
+        if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
+            mn = cur
+            best = i
+    if best != -1: spawn(spawnRow, best)
 
 def run_overlord():
     global board
     global roundNum
-    board = get_board()
-    if roundNum >= 15 and tryDefend():
-        return
-    tryAttack()
     roundNum += 1
+    board = get_board()
+    if roundNum >= 16:
+        if tryDefend():
+            return
+    tryAttack()
 
 def turn():
     # random stuff
