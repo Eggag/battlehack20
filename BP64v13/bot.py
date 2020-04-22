@@ -71,11 +71,11 @@ def run_pawn():
     kms = False
     op = 0
     if(team == Team.WHITE): op = boardSize - 1
-    thr = 6
+    thr = 4
     if(team == Team.WHITE):
-        if(row >= 8): thr = 7
+        if(row >= 7): thr = 7
     else:
-        if(row <= 7): thr = 7
+        if(row <= 8): thr = 7
     if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
@@ -154,11 +154,8 @@ def tryDefend():
 def tryAttack():
     # endpoints are of higher priority
     # don't ask...
-    # pos = [9, 1, 15, 3, 13, 5, 11, 7]
-    pos = [9, 1, 15, 3, 11, 5, 13, 7, 0, 14, 2, 12, 4, 10, 6, 8]
-    # pos = [1, 3, 2, 15, 4, 14, 5, 13, 6, 12, 7, 11, 8, 12, 16]
-    # pos = [0, 2, 1, 15, 3, 14, 4, 13, 5, 12, 6, 11, 7, 10, 8, 14]
-    # pos = [0, 2, 1, 15, 3, 5, 4, 14, 6, 8, 7, 13, 9, 11, 10, 12]
+    pos = [9, 1, 15, 3, 13, 5, 11, 7, 0, 14, 2, 12, 4, 10, 6, 8]
+    # pos = [9, 7, 1, 15, 3, 11, 13, 5, 0, 14, 2, 12, 4, 10, 6, 8]
     for i in pos:
         f = True
         for j in range(boardSize):
