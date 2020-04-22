@@ -54,23 +54,29 @@ def run_pawn():
     numBel = 0
     # need to have more below for a successful attack
     if team == Team.WHITE:
-        for i in range(-2, 1):
+        for i in range(-2, 2):
             for j in range(-1, 2):
-                if j != 0:
+                if(j != 0):
                     if(valid(row + i, col + j) == team): numBel += 1
     else:
-        for i in range(0, 3):
+        for i in range(-1, 3):
             for j in range(-1, 2):
-                if j != 0:
+                if(j != 0):
                     if(valid(row + i, col + j) == team): numBel += 1
+    gd = False
+    if(team == Team.BLACK):
+        if(row >= 7): gd = True
+    else:
+        if(row <= 9): gd = True
     kms = False
     op = 0
     if(team == Team.WHITE): op = boardSize - 1
-    thr = 6
-    if(row == (op - (2 * forward))): thr = 6
-    if(row == (op - (forward))): thr = 6
-    if((curNum - lstNum) > 60): thr = 5
-    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr):
+    thr = 7
+    if(team == Team.WHITE):
+        if(row >= 8): thr = 8
+    else:
+        if(row <= 7): thr = 8
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
@@ -143,134 +149,16 @@ def tryDefend():
     if(bestX != 100 and bestX != -100):
         spawn(spawnRow, bestY)
         return True
-    """
-    else:
-        mn1 = 1e9
-        bst1 = -1
-        nm1 = 1e9
-        mx1 = -1e9
-        bst2 = -1
-        nm2 = 1e9
-        for i in range(boardSize):
-            mn = 1e9
-            mx = -1e9
-            nm = 0
-            for j in range(boardSize):
-                if(oppTeam == board[j][i]):
-                    if(j < mn): mn = j
-                    if(j > mx): mx = j
-                if(team == board[j][i]):
-                    nm += 1
-            if(valid(spawnRow, i) == False and nm < 4):
-                if(mn < mn1):
-                    bst1 = i
-                    mn1 = mn
-                    nm1 = nm
-                elif(mn == mn1):
-                    if(nm < nm1):
-                        bst1 = i
-                        nm1 = nm
-                if(mx > mx1):
-                    bst2 = i
-                    mx1 = mx
-                    nm2 = nm
-                elif(mx == mx1):
-                    if(nm < nm2):
-                        bst2 = i
-                        nm2 = nm
-        if team == Team.WHITE:
-            # check the middle and the sides
-            # but the sides are more important...
-            if(bst1 != -1 and mn1 <= 6):
-                l = -1
-                r = -1
-                mid = 0
-                for i in range(mn1):
-                    if(board[i][bst1] == team): mid += 1
-                if(mid < 2):
-                    spawn(spawnRow, bst1)
-                    return True
-                else:
-                    if(bst1 > 0):
-                        for i in range(mn1):
-                            if(board[i][bst1 - 1] == team): l += 1
-                    if(bst1 < (boardSize - 1)):
-                        for i in range(mn1):
-                            if(board[i][bst1 + 1] == team): r += 1
-                    if l == -1:
-                        if(r != -1 and valid(spawnRow, bst1 + 1) == False):
-                            spawn(spawnRow, bst1 + 1)
-                            return True
-                    if r == -1:
-                        if(l != -1 and valid(spawnRow, bst1 - 1) == False):
-                            spawn(spawnRow, bst1 - 1)
-                            return True
-                    if(l >= 0 and r >= 0):
-                        if(valid(spawnRow, bst1 + 1) != False):
-                            if(valid(spawnRow, bst1 - 1) == False):
-                                spawn(spawnRow, bst1 - 1)
-                                return True
-                        if valid(spawnRow, bst1 - 1) != False:
-                            if(valid(spawnRow, bst1 + 1) == False):
-                                spawn(spawnRow, bst1 + 1)
-                                return True
-                        if((valid(spawnRow, bst1 - 1) == False) and (valid(spawnRow, bst1 + 1) == False)):
-                            if(l < r):
-                                spawn(spawnRow, bst1 - 1)
-                                return True
-                            else:
-                                spawn(spawnRow, bst1 + 1)
-                                return True
-        else:
-            l = -1
-            r = -1
-            mid = 0
-            for i in range(mx1 + 1, boardSize):
-                if(board[i][bst1] == team): mid += 1
-            if(mid < 2):
-                spawn(spawnRow, bst1)
-                return True
-            else:
-                if(bst1 > 0):
-                    for i in range(mx1 + 1, boardSize):
-                        if(board[i][bst1 - 1] == team): l += 1
-                if(bst1 < (boardSize - 1)):
-                    for i in range(mx1 + 1, boardSize):
-                        if(board[i][bst1 + 1] == team): r += 1
-                if l == -1:
-                    if(r != -1 and valid(spawnRow, bst1 + 1) == False):
-                        spawn(spawnRow, bst1 + 1)
-                        return True
-                if r == -1:
-                    if(l != -1 and valid(spawnRow, bst1 - 1) == False):
-                        spawn(spawnRow, bst1 - 1)
-                        return True
-                if(l >= 0 and r >= 0):
-                    if(valid(spawnRow, bst1 + 1) != False):
-                        if(valid(spawnRow, bst1 - 1) == False):
-                            spawn(spawnRow, bst1 - 1)
-                            return True
-                    if valid(spawnRow, bst1 - 1) != False:
-                        if(valid(spawnRow, bst1 + 1) == False):
-                            spawn(spawnRow, bst1 + 1)
-                            return True
-                if((valid(spawnRow, bst1 - 1) == False) and (valid(spawnRow, bst1 + 1) == False)):
-                    if(l < r):
-                        spawn(spawnRow, bst1 - 1)
-                        return True
-                    else:
-                        spawn(spawnRow, bst1 + 1)
-                        return True
-    """
     return False
 
 def tryAttack():
     # endpoints are of higher priority
     # don't ask...
     # pos = [9, 1, 15, 3, 13, 5, 11, 7]
-    pos = [9, 1, 15, 3, 13, 5, 11, 7, 2, 14, 4, 12, 6, 10, 8]
+    pos = [9, 1, 15, 7, 11, 2, 13, 5, 0, 14, 2, 12, 4, 10, 6, 8]
     # pos = [1, 3, 2, 15, 4, 14, 5, 13, 6, 12, 7, 11, 8, 12, 16]
     # pos = [0, 2, 1, 15, 3, 14, 4, 13, 5, 12, 6, 11, 7, 10, 8, 14]
+    # pos = [0, 2, 1, 15, 3, 5, 4, 14, 6, 8, 7, 13, 9, 11, 10, 12]
     for i in pos:
         f = True
         for j in range(boardSize):
@@ -280,7 +168,6 @@ def tryAttack():
         if f:
             spawn(spawnRow, i)
             return
-    # try to put it into a row we 'have'
     op = 0
     if(team == Team.WHITE): op = boardSize - 1 
     for i in pos:
@@ -293,7 +180,6 @@ def tryAttack():
             if f1:
                 spawn(spawnRow, i)
                 return
-    # just pick the one with the least of ours?
     best = -1
     mn = 1e9
     for i in range(boardSize):
@@ -310,7 +196,7 @@ def run_overlord():
     global board
     global roundNum
     board = get_board()
-    if tryDefend() and roundNum >= 15:
+    if roundNum >= 15 and tryDefend():
         return
     tryAttack()
     roundNum += 1
