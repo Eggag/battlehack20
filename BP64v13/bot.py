@@ -63,19 +63,19 @@ def run_pawn():
             for j in range(-1, 2):
                 if(j != 0):
                     if(valid(row + i, col + j) == team): numBel += 1
-    gd = False
-    if(team == Team.BLACK):
-        if(row >= 7): gd = True
+    gd = True
+    if(team == Team.WHITE):
+        if(row >= 10): gd = False
     else:
-        if(row <= 9): gd = True
+        if(row <= 6): gd = False
     kms = False
     op = 0
     if(team == Team.WHITE): op = boardSize - 1
-    thr = 7
+    thr = 6
     if(team == Team.WHITE):
-        if(row >= 8): thr = 8
+        if(row >= 8): thr = 7
     else:
-        if(row <= 7): thr = 8
+        if(row <= 7): thr = 7
     if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
