@@ -54,12 +54,12 @@ def run_pawn():
     numBel = 0
     # need to have more below for a successful attack
     if team == Team.WHITE:
-        for i in range(-2, 2):
+        for i in range(-2, 1):
             for j in range(-1, 2):
                 if(j != 0):
                     if(valid(row + i, col + j) == team): numBel += 1
     else:
-        for i in range(-1, 3):
+        for i in range(0, 3):
             for j in range(-1, 2):
                 if(j != 0):
                     if(valid(row + i, col + j) == team): numBel += 1
@@ -71,11 +71,11 @@ def run_pawn():
     kms = False
     op = 0
     if(team == Team.WHITE): op = boardSize - 1
-    thr = 4
+    thr = 3
     if(team == Team.WHITE):
-        if(row >= 7): thr = 7
+        if(row >= 7): thr = 5
     else:
-        if(row <= 8): thr = 7
+        if(row <= 8): thr = 5
     if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
@@ -154,8 +154,9 @@ def tryDefend():
 def tryAttack():
     # endpoints are of higher priority
     # don't ask...
-    pos = [9, 1, 15, 3, 13, 5, 11, 7, 0, 14, 2, 12, 4, 10, 6, 8]
+    # pos = [9, 1, 15, 3, 13, 5, 11, 7, 0, 14, 2, 12, 4, 10, 6, 8]
     # pos = [9, 7, 1, 15, 3, 11, 13, 5, 0, 14, 2, 12, 4, 10, 6, 8]
+    pos = [9, 1, 14, 4, 6, 11, 0, 2, 3, 5, 7, 8, 10, 12, 13, 15]
     for i in pos:
         f = True
         for j in range(boardSize):
