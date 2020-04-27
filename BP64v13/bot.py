@@ -32,9 +32,9 @@ roundNum = 0
 
 def run_pawn():
     global row, col
-    global lstNum, curNum
+    global lstNum, curNum, numCyc
+    global thr
     row, col = get_location()
-    dlog('My location is: ' + str(row) + ' ' + str(col))
     if(team == Team.BLACK and row == 0): return
     if(team == Team.WHITE and row == boardSize - 1): return
     forward = 1
@@ -47,151 +47,98 @@ def run_pawn():
         capture(row + forward, col - 1)
         return
     numBel = 0
+    # need to have more below for a successful attack
     if team == Team.WHITE:
-        for i in range(-2, 2):
+        for i in range(-2, 1):
             for j in range(-1, 2):
                 if j != 0:
                     if(valid(row + i, col + j) == team): numBel += 1
     else:
-        for i in range(-1, 3):
+        for i in range(0, 3):
             for j in range(-1, 2):
                 if j != 0:
                     if(valid(row + i, col + j) == team): numBel += 1
-    gd = True
-    if(team == Team.WHITE):
-        if(row >= 8): gd = False
-    else:
-        if(row <= 7): gd = False
-    if(col % 2 == 0):
-        if(team == Team.WHITE):
-            if(row >= 7): gd = False
-        else:
-            if(row <= 8): gd = False
     kms = False
-    op = 0
-    if(team == Team.WHITE): op = boardSize - 1 
-    thr = 7
-    if(row == (op - (2 * forward))): thr = 6
-    if(row == (op - (forward))): thr = 6
-    if((curNum - lstNum) > 100): thr = 6
-    if(valid(row - (2 * forward), col) == team and valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and numBel >= thr and gd):
+    # try to use our row advantage by accumulating pawns by attacking less frequently
+    thr = 0
+    if(team == Team.BLACK):
+        if(row <= 8): thr = 40
+    else:
+        if(row >= 7): thr = 40
+    tr = 5
+    if(team == Team.BLACK):
+        if(row <= 7): tr = 6
+        if(row >= 10): tr = 4
+    else:
+        if(row >= 8): tr = 6
+        if(row <= 6): tr = 4
+    if(valid(row - forward, col) == team and (valid(row, col - 1) == team and valid(row, col + 1) == team) and (curNum - lstNum) >= thr and numBel >= tr):
         kms = True
     if(((valid(row + 2 * forward, col + 1) != oppTeam) and (valid(row + 2 * forward, col - 1) != oppTeam)) or kms):
         if(valid(row + forward, col) == False):
             move_forward()
             lstNum = curNum
 
-def tryDefend():
-    bestX = -100
-    bestY = -100
-    if team == Team.WHITE:
-        bestX = 100
-        bestY = 100
-    if team == Team.BLACK:
-        for i in range(3, boardSize - 1):
-            for j in range(boardSize):
-                if board[i][j] == oppTeam:
-                    if j > 0:
-                        f = True
-                        for k in range(i + 1, boardSize):
-                            if board[k][j - 1] == team:
-                                f = False
-                            if board[k][j - 1] == oppTeam:
-                                f = False
-                        if f:
-                            if(((j == 1) or ((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam)) and (board[boardSize - 1][j] != oppTeam)):
-                                if(i > bestX):
-                                    bestX = i
-                                    bestY = j - 1
-                    if j < (boardSize - 1):
-                            f = True
-                            for k in range(i + 1, boardSize):
-                                if board[k][j + 1] == team:
-                                    f = False
-                                if board[k][j + 1] == oppTeam:
-                                    f = False
-                            if f:
-                                if((board[boardSize - 1][j] != oppTeam) and (((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam) or (j + 2 >= boardSize))):
-                                    if(i > bestX):
-                                        bestX = i
-                                        bestY = j + 1
-    else:
-        for i in range(1, boardSize - 3):
-            for j in range(boardSize):
-                if board[i][j] == oppTeam:
-                    if j > 0:
-                        f = True
-                        for k in range(i - 1, -1, -1):
-                            if board[k][j - 1] == team:
-                                f = False
-                            if board[k][j - 1] == oppTeam:
-                                f = False
-                        if f:
-                            if(((j - 1) > 0 and board[boardSize - 1][j - 2] != oppTeam) and (board[boardSize - 1][j] != oppTeam)):
-                                if(i < bestX):
-                                    bestX = i
-                                    bestY = j - 1
-                    if j < (boardSize - 1):
-                            f = True
-                            for k in range(i - 1, -1, -1):
-                                if board[k][j + 1] == team:
-                                    f = False
-                                if board[k][j + 1] == oppTeam:
-                                    f = False
-                            if f:
-                                if((board[boardSize - 1][j] != oppTeam) and ((j + 2) < boardSize and board[boardSize - 1][j + 2] != oppTeam)):
-                                    if(i < bestX):
-                                        bestX = i
-                                        bestY = j + 1
-    if(bestX != 100 and bestX != -100):
-        spawn(spawnRow, bestY)
-        return True
-    return False
+def tryInit():
+    pos = [1, 4, 7, 10, 13, 15]
+    spawn(spawnRow, pos[roundNum - 1])
 
-def tryAttack():
-    pos = [9, 1, 14, 4, 6, 11, 0, 2, 3, 5, 7, 8, 10, 12, 13, 15]
-    for i in pos:
-        f = True
+def score(i):
+    # calculates the score of the current column
+    # use this to assign rows to values
+    num = [0.1, 0.2, 0.3, 0.4, 0.5, 1, 2, 7, 8, 20, 30, 40, 50, 60, 0]
+    forward = 1
+    if team == Team.BLACK: forward = -1
+    sc = 0
+    if(i > 0):
+        if(valid(spawnRow + forward, i - 1) == oppTeam):
+            # very bad: we will be captured immeiately
+            sc -= 1000
+    if(i < (boardSize - 1)):
+        if(valid(spawnRow + forward, i + 1) == oppTeam):
+            # same as above but for another row
+            sc -= 1000
+    # take into account how many we already have (both in neighbouring rows and our row
+    tot = 0
+    for j in range(boardSize):
+        if(board[j][i] == team): tot += 1
+    # try to get more here if we have not a lot of teammates here
+    need = [100, 70, 50, 30, 20, 15, 10, 7, 5, 2, 1, 1, 0, 0, 0, 0, 0]
+    sc += 5 * need[tot]
+    for j in range(boardSize):
+        if(board[j][i] == oppTeam):
+            sc += 0.2 * num[15 - abs(j - spawnRow)]
+    if(i > 0):
         for j in range(boardSize):
-            if(board[j][i] == team):
-                f = False
-                break
-        if f:
-            spawn(spawnRow, i)
-            return
-    op = 0
-    if(team == Team.WHITE): op = boardSize - 1 
-    for i in pos:
-        if(board[op][i] == team):
-            f1 = True
-            for j in range(boardSize):
-                if((j != op) and (board[j][i] == team or board[j][i] == oppTeam)):
-                    f1 = False
-                    break
-            if f1:
-                spawn(spawnRow, i)
-                return
-    best = -1
-    mn = 1e9
+            if(board[j][i - 1] == oppTeam):
+                sc += 3 * num[15 - abs(j - spawnRow)]
+    if(i < (boardSize - 1)):
+        for j in range(boardSize):
+            if(board[j][i + 1] == oppTeam):
+                sc += 3 * num[15 - abs(j - spawnRow)]
+    return sc
+    
+
+def trySpawn():
+    mx = -10000
+    bst = -1
     for i in range(boardSize):
-        cur = 0
-        for j in range(boardSize):
-            if board[j][i] == team:
-                cur += 1
-        if(cur < mn and valid(spawnRow, i) == False and board[op][i] != team):
-            mn = cur
-            best = i
-    if best != -1: spawn(spawnRow, best)
+        cur = score(i)
+        if(cur > mx and valid(spawnRow, i) == False):
+            mx = cur
+            bst = i
+    if(bst != -1): spawn(spawnRow, bst)
+
 
 def run_overlord():
     global board
     global roundNum
     roundNum += 1
     board = get_board()
-    if roundNum >= 16:
-        if tryDefend():
-            return
-    tryAttack()
+    if roundNum <= 6:
+        tryInit()
+    else: 
+        trySpawn()
 
 def turn():
     # random stuff
